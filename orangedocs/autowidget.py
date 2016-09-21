@@ -1,8 +1,12 @@
 from sphinx.ext.autodoc import ClassDocumenter
+import shutil
 import os
 
 widget_template = """
 {widget.description}
+
+.. figure:: _static/{widget.icon}
+
 
 Signals
 -------
@@ -40,6 +44,14 @@ class WidgetDocument(ClassDocumenter):
 
     def get_doc(self, encoding=None, ignore=1):
         """Bypass superclass' get_doc with custom documentation."""
+        icon_path = os.path.join(os.path.abspath(os.path.join(self.module.__file__, '..')), self.object.icon)
+
+        icon_dir = os.path.join(self.env.app.outdir, '_static', 'icons')
+        if not os.path.exists(icon_dir):
+            os.makedirs(icon_dir)
+
+        icon = os.path.basename(self.object.icon)
+        shutil.copyfile(icon_path, os.path.join(icon_dir, icon))
         return [render_widget(self.object).split('\n')]
 
     def add_directive_header(self, sig):
