@@ -1,11 +1,10 @@
-from sphinx.ext.autodoc import ClassDocumenter
-import shutil
+from sphinx.ext.autodoc import ClassDocumenter, bool_option
 import os
 
 widget_template = """
 {widget.description}
 
-.. figure:: _static/{widget.icon}
+.. figure:: {icon}
 
 
 Signals
@@ -28,10 +27,10 @@ def render_channels(channels):
     return '\n'.join(chanel_template.format(chanel=c, doc=c.doc or '') for c in channels) or no_channels
 
 
-def render_widget(widget):
+def render_widget(widget, icon):
     return widget_template.format(widget=widget, dots='=' * len(widget.name),
                                   inputs=render_channels(widget.inputs),
-                                  outputs=render_channels(widget.outputs))
+                                  outputs=render_channels(widget.outputs), icon=icon)
 
 
 class WidgetDocument(ClassDocumenter):
@@ -41,18 +40,20 @@ class WidgetDocument(ClassDocumenter):
     objtype = 'widget'
     content_indent = ''
     titles_allowed = True
+    option_spec = {
+        'icon': lambda x: x,
+        'noindex': bool_option,
+    }
 
     def get_doc(self, encoding=None, ignore=1):
         """Bypass superclass' get_doc with custom documentation."""
-        icon_path = os.path.join(os.path.abspath(os.path.join(self.module.__file__, '..')), self.object.icon)
 
-        icon_dir = os.path.join(self.env.app.outdir, '_static', 'icons')
-        if not os.path.exists(icon_dir):
-            os.makedirs(icon_dir)
-
-        icon = os.path.basename(self.object.icon)
-        shutil.copyfile(icon_path, os.path.join(icon_dir, icon))
-        return [render_widget(self.object).split('\n')]
+        if self.options.get('icon', None):
+            icon = self.options['icon']
+        else:
+            icon = '/' + os.path.join(
+                os.path.abspath(os.path.join(self.module.__file__, '..')), self.object.icon)
+        return [render_widget(self.object, icon=icon).split('\n')]
 
     def add_directive_header(self, sig):
         """Add the directive header and options to the generated content."""
