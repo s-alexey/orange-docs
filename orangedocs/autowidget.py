@@ -2,6 +2,9 @@ from sphinx.ext.autodoc import ClassDocumenter, bool_option
 import os
 
 widget_template = """
+{widget.name}
+{dots}
+
 {widget.description}
 
 .. figure:: {icon}
