@@ -1,4 +1,4 @@
-from .autowidget import WidgetDocument
+from .autowidget import WidgetDocument, process_widgets, TowTree
 
 __version__ = '0.1'
 
@@ -13,3 +13,6 @@ def setup(app):
                           objname='widget')
 
     app.add_autodocumenter(WidgetDocument)
+
+    app.add_directive('towtree', TowTree)
+    app.connect('doctree-resolved', process_widgets)

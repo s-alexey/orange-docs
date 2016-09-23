@@ -1,3 +1,5 @@
+from sphinx import addnodes
+from sphinx.directives.other import TocTree
 from sphinx.ext.autodoc import ClassDocumenter, bool_option
 import os
 
@@ -50,6 +52,15 @@ class WidgetDocument(ClassDocumenter):
 
     def get_doc(self, encoding=None, ignore=1):
         """Bypass superclass' get_doc with custom documentation."""
+        if not hasattr(self.env, 'orange_all_widget'):
+            self.env.orange_all_widget = {}
+
+        self.env.orange_all_widget[self.env.docname] = {
+            'name': self.object.name,
+            'module': self.modname,
+            'priority': self.object.priority,
+            'document': self.env.docname,
+        }
 
         if self.options.get('icon', None):
             icon = self.options['icon']
@@ -68,3 +79,24 @@ class WidgetDocument(ClassDocumenter):
                       sourcename)
         if self.options.noindex:
             self.add_line(u'   :noindex:', sourcename)
+
+
+class TowTree(TocTree):
+    def run(self):
+        res = super().run()
+        # Mark widgets toctree nodes.
+        for compound in res:
+            for node in compound:
+                node.attributes['widget'] = True
+        return res
+
+
+def process_widgets(app, doctree, fromdocname):
+    env = app.builder.env
+    if not hasattr(env, 'orange_all_widget'):
+        return
+
+    for node in doctree.traverse(addnodes.toctree):
+        if node.attributes.get('widget', False):
+            node.attributes['entries'] = sorted(node.attributes['entries'],
+                                                key=lambda x: env.orange_all_widget[x[1]].get('priority', -1))
