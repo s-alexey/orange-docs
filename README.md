@@ -5,4 +5,6 @@ This module simplifies documenting of [Orange](https://github.com/biolab) core l
 
 ## Features
 
-- `widget` object type. 
+- `widget` object type. Allows use `:ref:`OWFile``
+- `audowidget` an `autoclass` analog for widgets. 
+- `towtree` for table-of-widgets
