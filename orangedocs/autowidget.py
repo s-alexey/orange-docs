@@ -38,7 +38,7 @@ def render_widget(widget, icon):
                                   outputs=render_channels(widget.outputs), icon=icon)
 
 
-class WidgetDocument(ClassDocumenter):
+class WidgetDocumenter(ClassDocumenter):
     """ :class:`Orange.widgets.widget.OWWidget` documenter.
 
     """
